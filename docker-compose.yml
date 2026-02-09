@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # --- BASE DE DATOS (PostgreSQL) ---
+  database:
+    image: postgres:15
+    container_name: todo_db
+    restart: always
+    environment:
+      # Variables estándar de la imagen oficial de Postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - todo_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- BACKEND (Node.js) ---
+  backend:
+    build: ./backend
+    container_name: todo_backend
+    ports:
+      - "${BACKEND_PORT}:4000"
+    environment:
+      PORT: 4000
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${POSTGRES_USER}      # Aquí pasamos 'tu_usuario'
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - todo_network
+
+  # --- FRONTEND (Nginx) ---
+  frontend:
+    image: nginx:alpine
+    container_name: todo_frontend
+    ports:
+      - "8080:80"
+    volumes:
+      # Bind mount: lo que cambies en tu carpeta local se verá en el navegador sin rebuild
+      - ./frontend:/usr/share/nginx/html:ro
+    networks:
+      - todo_network
+
+# Red personalizada para comunicación segura entre servicios
+networks:
+  todo_network:
+    driver: bridge
+
+# Volumen persistente para que no se borren las tareas al apagar Docker
+volumes:
+  db_data:
