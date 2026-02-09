@@ -19,16 +19,14 @@ La aplicación se divide en tres contenedores independientes:
 Por seguridad, las credenciales no están incluidas en el código. **Debes crear un archivo llamado `.env` en la raíz del proyecto** con el siguiente contenido:
 
 ```env
-# --- Configuración de PostgreSQL ---
-POSTGRES_USER=jorge
-POSTGRES_PASSWORD=admin123
-POSTGRES_DB=BaseDatos1
+# -# Configuración de PostgreSQL
+POSTGRES_USER=tu_usuario
+POSTGRES_PASSWORD=tu_contraseña_segura
+POSTGRES_DB=nombre_base_datos
 
-# --- Configuración del Backend ---
+# Configuración del Backend
 DB_HOST=database
 DB_PORT=5432
-
-# --- Puertos de acceso externo ---
 BACKEND_PORT=4000
 ```
 ## Comandos para el Despliegue
